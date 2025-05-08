@@ -7,7 +7,7 @@ BEGIN
     IF EXISTS (SELECT 1 FROM users WHERE username = p_username) THEN
         RETURN 'Username already exists';
     END IF;
-    IF email IS NOT NULL AND EXISTS (SELECT 1 FROM users WHERE email = p_email) THEN
+    IF p_email IS NOT NULL AND EXISTS (SELECT 1 FROM users WHERE email = p_email) THEN
         RETURN 'Email in use';
    END IF;
 
@@ -27,7 +27,7 @@ RETURNS VARCHAR
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    IF EXISTS (SELECT 1 FROM users WHERE username = p_username) THEN
+    IF NOT EXISTS (SELECT 1 FROM users WHERE username = p_username) THEN
         RETURN 'User not found';
     END IF;
 
@@ -50,22 +50,25 @@ BEGIN
     RETURN QUERY
     SELECT user_id, username, email, created_at
     FROM users
-    WHERE username = username;
+    WHERE username = p_username;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'User not found';
     END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Error fetching user details %', SQLERRM;
 END;
 $$;
 
 -- Login
-CREATE OR REPLACE FUNCTION login(p_username VARCHAR , p_password_hash VARCHAR)
+CREATE OR REPLACE FUNCTION login(p_username VARCHAR)
 RETURNS TABLE (user_id INTEGER, password_hash VARCHAR)
 LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT username, password_hash
+    SELECT user_id, password_hash
     FROM users
     where username = p_username;
 
@@ -112,7 +115,7 @@ BEGIN
     WHERE username = p_username;
 
     IF v_user_id IS NULL THEN
-        RETURN 'User not found';
+        RAISE EXCEPTION 'User not found';
     END IF;
 
     RETURN v_user_id;
