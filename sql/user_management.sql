@@ -48,9 +48,9 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT user_id, username, email, created_at
+    SELECT users.user_id, users.username, users.email, users.created_at
     FROM users
-    WHERE username = p_username;
+    WHERE users.username = p_username;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'User not found';
@@ -68,9 +68,9 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT user_id, password_hash
+    SELECT users.user_id, users.password_hash
     FROM users
-    where username = p_username;
+    where users.username = p_username;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION 'User not found';
