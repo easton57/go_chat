@@ -37,7 +37,7 @@ BEGIN
     RETURN 'Password updated';
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN 'Error updateding password: ' || SQLERRM;
+        RETURN 'Error updating password: ' || SQLERRM;
 END;
 $$;
 
