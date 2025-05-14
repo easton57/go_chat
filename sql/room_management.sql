@@ -14,7 +14,6 @@ BEGIN
 
     INSERT INTO rooms (room_name, created_by, created_at)
     VALUES (p_room_name, p_user_id, CURRENT_TIMESTAMP);
-    RETURN 'Room created';
 
     RETURN 'Room created';
 
