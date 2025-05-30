@@ -23,8 +23,6 @@ func main() {
 	slog.SetDefault(slog.New(logger))
 	slog.Info("Starting go_chat")
 
-	// Check for credentials in environment and prompt for them if not present
-
 	// Database connection creation
 	slog.Info("Testing Database connection")
 	dbConn, err := db.NewDB(db.GetConnInfo())
