@@ -10,22 +10,18 @@ import (
 )
 
 func main() {
-	// Logger file
-	logFile, err := os.OpenFile("logs/go_chat.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer logFile.Close()
-
-	// Logger initialization
-	logLevel := new(slog.LevelVar)
-	logger := slog.NewJSONHandler(logFile, &slog.HandlerOptions{Level: logLevel})
-	slog.SetDefault(slog.New(logger))
-	slog.Info("Starting go_chat")
+	// Initialize main logger
+	logger := createLogConfig("go_chat.log")	
+	slog.SetDefault(logger)
+	slog.Info("* * * * * * * * * * *")
+	slog.Info("* Starting go_chat! *")
+	slog.Info("* * * * * * * * * * *")
 
 	// Database connection creation
 	slog.Info("Testing Database connection")
-	dbConn, err := db.NewDB(db.GetConnInfo())
+	dbLogger := createLogConfig("db.log")
+
+	dbConn, err := db.NewDB(db.GetConnInfo(), dbLogger)
 	if err != nil {
 		slog.Error("Can't connect to database!", "error", err)
 		os.Exit(1)
@@ -43,4 +39,19 @@ func main() {
 	http.ListenAndServe(":8090", nil)
 }
 
+func createLogConfig(fileName string) *slog.Logger {
+	// Create path string
+	filePath := "logs/" + fileName
 
+	// Logger file
+	logFile, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	// Logger initialization
+	logLevel := new(slog.LevelVar)
+	logger := slog.NewJSONHandler(logFile, &slog.HandlerOptions{Level: logLevel})
+
+	return slog.New(logger)
+}

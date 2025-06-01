@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"database/sql"
+	"log/slog"
 
 	_ "github.com/lib/pq"
 )
@@ -11,22 +12,32 @@ import (
 // DB Struct
 type DB struct {
 	conn *sql.DB
+	log *slog.Logger
 }
 
 // For creating a new database connection
-func NewDB(connInfo string) (*DB, error) {
+func NewDB(connInfo string, logger *slog.Logger) (*DB, error) {
+	logger.Info("* * * * * * * * * * * * * *")
+	logger.Info("* Creating DB Connection *")
+	logger.Info("* * * * * * * * * * * * * *")
+
 	db, err := sql.Open("postgres", connInfo)	
 	if err != nil {
+		logger.Error("Couldn't connect to database!")
 		return nil, err	
 	}
 
-	newDB := DB{conn: db}
+	logger.Info("Connection to database opened")
+
+	newDB := DB{conn: db, log: logger}
 
 	// Verify connection
 	_, err = newDB.HealthCheck()
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Info("Database successfully connected")
 
 	return &newDB, nil
 }
@@ -37,10 +48,15 @@ func (db *DB) Close() error {
 
 // Check to see if the database is pingable
 func (db *DB) HealthCheck() (bool, error) {
+	db.log.Info("Pinging database...")
 	err := db.conn.Ping()
 	if err != nil {
+		errorStr := "Unable to ping database: " + err.Error()
+		db.log.Error(errorStr)
 		return false, err
 	}
+
+	db.log.Info("Database pingable")
 
 	return true, nil 
 }
