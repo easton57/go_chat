@@ -29,14 +29,19 @@ func main() {
 	defer dbConn.Close()
 	slog.Info("Database connection successful")
 
-	// Initialize our handler
-	h := &handlers.Handler{Db: dbConn}
+	// Initialize our handler struct
+	slog.Info("Setting up handler")
+	handlerLogger := createLogConfig("handler.log")
+	h := &handlers.Handler{Db: dbConn, Log: handlerLogger}
 	
 	// Setup our endpoints
 	http.HandleFunc("/health", h.Health)
+	slog.Info("Endpoints configured")
 
-	slog.Info("Delivering application")
-	http.ListenAndServe(":8090", nil)
+	port := ":8090"
+
+	slog.Info("Delivering application", "port", port)
+	http.ListenAndServe(port, nil)
 }
 
 func createLogConfig(fileName string) *slog.Logger {
